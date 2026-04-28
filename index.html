@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apache Pinot — Real-Time Data Platform</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0a0a0f;
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .slides { width: 100%; height: 100vh; position: relative; }
+
+  .slide {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    padding: 60px 80px 100px;
+    position: absolute;
+    top: 0; left: 0;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .slide.active { display: flex; }
+
+  /* SLIDE 1 — Title */
+  .slide-title {
+    background: linear-gradient(135deg, #0a0a0f 0%, #0d1b2a 50%, #0a0a0f 100%);
+    align-items: center;
+    text-align: center;
+  }
+
+  .slide-title .eyebrow {
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #00d4aa;
+    margin-bottom: 24px;
+  }
+
+  .slide-title h1 {
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, #00d4aa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 24px;
+  }
+
+  .slide-title .subtitle {
+    font-size: 22px;
+    color: #8899aa;
+    max-width: 600px;
+    line-height: 1.5;
+  }
+
+  .slide-title .hero-number {
+    margin-top: 60px;
+    display: flex;
+    gap: 80px;
+    justify-content: center;
+  }
+
+  .hero-stat { text-align: center; }
+  .hero-stat .value {
+    font-size: 52px;
+    font-weight: 900;
+    color: #00d4aa;
+  }
+  .hero-stat .label {
+    font-size: 13px;
+    color: #8899aa;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* COMMON */
+  .slide-label {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #00d4aa;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 48px;
+    color: #fff;
+  }
+
+  h2 span { color: #00d4aa; }
+
+  /* SLIDE 2 — Problem */
+  .slide-problem { background: #0a0a0f; }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .problem-card {
+    background: #12121a;
+    border: 1px solid #1e2030;
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  .problem-card.highlight {
+    border-color: #ff4444;
+    background: linear-gradient(135deg, #12121a, #1a0d0d);
+  }
+
+  .problem-card .big-number {
+    font-size: 56px;
+    font-weight: 900;
+    color: #ff4444;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .problem-card.highlight2 .big-number { color: #ffaa00; }
+
+  .problem-card .card-label {
+    font-size: 14px;
+    color: #8899aa;
+    line-height: 1.5;
+  }
+
+  .problem-card .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  /* SLIDE 3 — Root Cause */
+  .slide-rootcause { background: #0a0a0f; }
+
+  .pipeline-box {
+    background: #12121a;
+    border: 1px solid #1e2030;
+    border-radius: 16px;
+    padding: 40px 48px;
+    margin-bottom: 32px;
+  }
+
+  .pipeline-box .pipe-label {
+    font-size: 12px;
+    color: #8899aa;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .pipeline-flow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    flex-wrap: wrap;
+  }
+
+  .pipe-node {
+    background: #1e2030;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: #ccc;
+    white-space: nowrap;
+  }
+
+  .pipe-node.bad {
+    background: #2a1a1a;
+    border: 1px solid #ff4444;
+    color: #ff8888;
+  }
+
+  .pipe-arrow { color: #444; font-size: 18px; }
+
+  .insight-box {
+    background: linear-gradient(135deg, #0d1a0d, #12121a);
+    border: 1px solid #00d4aa33;
+    border-radius: 12px;
+    padding: 24px 32px;
+    font-size: 18px;
+    color: #ccc;
+    line-height: 1.6;
+  }
+
+  .insight-box strong { color: #00d4aa; }
+
+  /* SLIDE 4 — Solution */
+  .slide-solution { background: #0a0a0f; }
+
+  .before-after {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .ba-card {
+    background: #12121a;
+    border: 1px solid #1e2030;
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  .ba-card.after {
+    border-color: #00d4aa44;
+    background: linear-gradient(135deg, #0a1a15, #12121a);
+  }
+
+  .ba-card .ba-label {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8899aa;
+    margin-bottom: 16px;
+  }
+
+  .ba-card.after .ba-label { color: #00d4aa; }
+
+  .ba-card .ba-flow {
+    font-size: 13px;
+    color: #666;
+    line-height: 2;
+  }
+
+  .ba-card.after .ba-flow { color: #aaa; }
+  .ba-card.after .ba-flow strong { color: #00d4aa; }
+
+  /* SLIDE 5 — Live Today */
+  .slide-live { background: #0a0a0f; }
+
+  .pinot-value-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .pv-card {
+    background: #12121a;
+    border: 1px solid #1e2030;
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .pv-icon { font-size: 28px; margin-bottom: 10px; }
+  .pv-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .pv-desc { font-size: 12px; color: #666; line-height: 1.5; }
+
+  .brands-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .brand-card {
+    background: linear-gradient(135deg, #0a1a15, #12121a);
+    border: 1px solid #00d4aa33;
+    border-radius: 14px;
+    padding: 24px 20px;
+  }
+
+  .brand-name {
+    font-size: 22px;
+    font-weight: 900;
+    color: #00d4aa;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .brand-tables { display: flex; flex-direction: column; gap: 6px; }
+
+  .brand-table {
+    font-size: 12px;
+    color: #8899aa;
+    background: #0a0a0f;
+    border-radius: 6px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .brand-table::before { content: '●'; color: #00d4aa; font-size: 8px; }
+
+  /* SLIDE 6 — Impact */
+  .slide-impact { background: #0a0a0f; }
+
+  .impact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .impact-card {
+    background: #12121a;
+    border: 1px solid #1e2030;
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .impact-card.winner {
+    border-color: #00d4aa;
+    background: linear-gradient(135deg, #0a1a15, #12121a);
+    transform: scale(1.03);
+  }
+
+  .impact-card .scenario { font-size: 12px; color: #8899aa; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+  .impact-card .cost { font-size: 42px; font-weight: 900; color: #fff; line-height: 1; }
+  .impact-card.winner .cost { color: #00d4aa; }
+  .impact-card .per-year { font-size: 14px; color: #666; margin-top: 4px; margin-bottom: 16px; }
+  .impact-card .saving {
+    font-size: 15px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: #1e2030;
+    color: #8899aa;
+    display: inline-block;
+  }
+  .impact-card.winner .saving { background: #00d4aa22; color: #00d4aa; }
+
+  .total-saving {
+    background: linear-gradient(135deg, #0a1a15, #0d1b2a);
+    border: 1px solid #00d4aa44;
+    border-radius: 12px;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .total-saving .ts-label { font-size: 16px; color: #8899aa; }
+  .total-saving .ts-value { font-size: 36px; font-weight: 900; color: #00d4aa; }
+
+  /* SLIDE 6 — Quick Win */
+  .slide-quickwin { background: #0a0a0f; }
+
+  .qw-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .qw-card {
+    background: #12121a;
+    border: 1px solid #1e2030;
+    border-radius: 16px;
+    padding: 36px;
+  }
+
+  .qw-card.green {
+    border-color: #00d4aa44;
+    background: linear-gradient(135deg, #0a1a15, #12121a);
+  }
+
+  .qw-card .qw-title { font-size: 13px; color: #8899aa; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+  .qw-card.green .qw-title { color: #00d4aa; }
+  .qw-card .qw-number { font-size: 60px; font-weight: 900; color: #ffaa00; line-height: 1; margin-bottom: 8px; }
+  .qw-card.green .qw-number { color: #00d4aa; }
+  .qw-card .qw-desc { font-size: 15px; color: #8899aa; line-height: 1.6; }
+  .qw-card .qw-tag {
+    display: inline-block;
+    margin-top: 20px;
+    background: #ffaa0022;
+    color: #ffaa00;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+  .qw-card.green .qw-tag { background: #00d4aa22; color: #00d4aa; }
+
+  /* SLIDE 7 — Status */
+  .slide-status { background: #0a0a0f; }
+
+  .status-header {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+
+  .progress-ring-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+
+  .progress-ring-wrap svg { transform: rotate(-90deg); }
+
+  .progress-ring-wrap .ring-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 26px;
+    font-weight: 900;
+    color: #00d4aa;
+  }
+
+  .status-headline { font-size: 28px; font-weight: 700; line-height: 1.4; }
+  .status-headline span { color: #00d4aa; }
+
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .status-item {
+    background: #12121a;
+    border: 1px solid #1e2030;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .status-icon { font-size: 20px; flex-shrink: 0; }
+  .status-name { font-size: 14px; font-weight: 600; color: #ccc; }
+  .status-rows { font-size: 12px; color: #666; margin-top: 2px; }
+
+  /* SLIDE 8 — Timeline */
+  .slide-timeline { background: #0a0a0f; }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 48px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    bottom: 16px;
+    width: 2px;
+    background: linear-gradient(to bottom, #00d4aa, #0044ff44);
+  }
+
+  .tl-item {
+    display: flex;
+    gap: 24px;
+    padding: 16px 0;
+    position: relative;
+  }
+
+  .tl-dot {
+    position: absolute;
+    left: -40px;
+    top: 22px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #00d4aa;
+    border: 2px solid #0a0a0f;
+    box-shadow: 0 0 0 3px #00d4aa44;
+  }
+
+  .tl-dot.done { background: #00d4aa; }
+  .tl-dot.soon { background: #ffaa00; box-shadow: 0 0 0 3px #ffaa0044; }
+  .tl-dot.future { background: #444; box-shadow: none; }
+
+  .tl-time {
+    font-size: 12px;
+    color: #8899aa;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    min-width: 80px;
+    padding-top: 3px;
+  }
+
+  .tl-content { flex: 1; }
+  .tl-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .tl-desc { font-size: 13px; color: #666; line-height: 1.5; }
+  .tl-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 10px;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+
+  .badge-done { background: #00d4aa22; color: #00d4aa; }
+  .badge-soon { background: #ffaa0022; color: #ffaa00; }
+  .badge-saving { background: #0044ff22; color: #4488ff; }
+
+  /* SLIDE 9 — ROI */
+  .slide-roi { background: #0a0a0f; align-items: center; text-align: center; }
+
+  .roi-center { max-width: 800px; }
+
+  .roi-label { font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #00d4aa; margin-bottom: 24px; }
+
+  .roi-number {
+    font-size: 100px;
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, #00d4aa, #0088ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+  }
+
+  .roi-subtitle { font-size: 24px; color: #8899aa; margin-bottom: 56px; }
+
+  .roi-breakdown {
+    display: flex;
+    gap: 48px;
+    justify-content: center;
+    margin-bottom: 48px;
+  }
+
+  .roi-item { text-align: center; }
+  .roi-item .rv { font-size: 32px; font-weight: 800; color: #fff; }
+  .roi-item .rl { font-size: 13px; color: #666; margin-top: 4px; }
+
+  .roi-cta {
+    background: linear-gradient(135deg, #00d4aa, #0088ff);
+    color: #000;
+    font-size: 16px;
+    font-weight: 800;
+    padding: 16px 40px;
+    border-radius: 40px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* NAV */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #12121a;
+    border: 1px solid #1e2030;
+    border-radius: 40px;
+    padding: 10px 24px;
+    z-index: 100;
+  }
+
+  .nav button {
+    background: none;
+    border: none;
+    color: #8899aa;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+
+  .nav button:hover { color: #fff; background: #1e2030; }
+
+  .nav .dots { display: flex; gap: 8px; }
+
+  .nav .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #1e2030;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .nav .dot.active { background: #00d4aa; width: 24px; border-radius: 4px; }
+
+  .slide-counter {
+    font-size: 12px;
+    color: #666;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  /* Animations */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .slide.active > * { animation: fadeIn 0.4s ease forwards; }
+  .slide.active > *:nth-child(2) { animation-delay: 0.1s; opacity: 0; }
+  .slide.active > *:nth-child(3) { animation-delay: 0.2s; opacity: 0; }
+  .slide.active > *:nth-child(4) { animation-delay: 0.3s; opacity: 0; }
+</style>
+</head>
+<body>
+
+<div class="slides">
+
+  <!-- SLIDE 1: TITLE -->
+  <div class="slide slide-title active">
+    <div class="eyebrow">Data Platform · Apache Pinot</div>
+    <h1>De $3.094/mês<br>para $27/mês</h1>
+    <div class="subtitle">Como substituir batch simulando real-time por dados genuinamente em tempo real economizamos $56.8K/ano no processo.</div>
+    <div class="hero-number">
+      <div class="hero-stat">
+        <div class="value">99%</div>
+        <div class="label">Redução de custo</div>
+      </div>
+      <div class="hero-stat">
+        <div class="value">&lt;2s</div>
+        <div class="label">Latência (antes: 12 min)</div>
+      </div>
+      <div class="hero-stat">
+        <div class="value">75%</div>
+        <div class="label">das origens já ingeridas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: PROBLEM -->
+  <div class="slide slide-problem">
+    <div class="slide-label">O Problema · Brand 7K</div>
+    <h2>Pagando caro para<br>simular o que <span>já temos</span></h2>
+    <div class="problem-grid">
+      <div class="problem-card highlight">
+        <div class="big-number">$3.094</div>
+        <div class="card-title">por mês — um único job da 7K</div>
+        <div class="card-label">O job <code>a7kbetbr_gold_backoffice</code> roda em Databricks Photon Premium. Sozinho, representa um custo relevante na conta da Databricks.</div>
+      </div>
+      <div class="problem-card highlight2">
+        <div class="big-number">114×</div>
+        <div class="card-title">execuções por dia</div>
+        <div class="card-label">A cada 12,5 minutos o job roda — não porque precisa, mas para <strong>simular dados em tempo real com batch</strong>. O problema é a arquitetura, não o job.</div>
+      </div>
+      <div class="problem-card">
+        <div class="big-number" style="color:#8899aa;font-size:40px">12,5 min</div>
+        <div class="card-title">de atraso nos dashboards</div>
+        <div class="card-label">Mesmo rodando a cada 12 minutos, os dados chegam sempre atrasados. Decisões de negócio são tomadas com informações defasadas.</div>
+      </div>
+      <div class="problem-card">
+        <div class="big-number" style="color:#8899aa;font-size:40px">$37.1K</div>
+        <div class="card-title">gasto por ano, só na 7K</div>
+        <div class="card-label">Este é o caso piloto. <strong style="color:#fff">Vera e Casino seguem o mesmo padrão</strong> — a migração da 7K abre o caminho para as demais brands.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: ROOT CAUSE -->
+  <div class="slide slide-rootcause">
+    <div class="slide-label">Causa Raiz</div>
+    <h2>O pipeline real-time <span>já existe.</span><br>Só não estamos usando.</h2>
+    <div class="pipeline-box">
+      <div class="pipe-label">Hoje — pipeline atual</div>
+      <div class="pipeline-flow">
+        <div class="pipe-node">MySQL</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">Debezium (CDC)</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">Kafka</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">S3</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node bad">Databricks 114×/dia</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node bad">Back-Office (+12 min)</div>
+      </div>
+    </div>
+    <div class="pipeline-box" style="border-color:#00d4aa44;background:linear-gradient(135deg,#0a1a15,#12121a)">
+      <div class="pipe-label" style="color:#00d4aa">Com Pinot — nova infraestrutura de ingestão</div>
+      <div class="pipeline-flow">
+        <div class="pipe-node">MySQL</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">Debezium (CDC)</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" style="border:1px solid #00d4aa44;color:#00d4aa;background:#0a1a15">Kafka</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" style="border:1px solid #00d4aa44;color:#00d4aa;background:#0a1a15">Pinot (&lt;2s)</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" style="color:#fff">Back-Office</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="insight-box">
+        Adicionar Pinot = <strong>um novo consumer group no tópico Kafka existente.</strong> O pipeline de ingestão do databricks não muda. Zero retrabalho. Zero nova infraestrutura de captura.
+      </div>
+      <div class="insight-box" style="background:linear-gradient(135deg,#0d1b2a,#12121a);border-color:#0088ff33">
+        Infra Pinot já em produção com <strong style="color:#4488ff">7K, Verabet e Casino</strong>: <strong style="color:#4488ff">$4.925/mês</strong> on-demand —
+        ou <strong style="color:#4488ff">$3.250/mês</strong> com EC2 Savings Plans 1yr.<br>
+        <span style="color:#666;font-size:13px">Adicionar este caso de uso: custo incremental <strong style="color:#fff">$0</strong>. A infra já está paga.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: SOLUTION -->
+  <div class="slide slide-solution">
+    <div class="slide-label">A Solução</div>
+    <h2>Apache Pinot: <span>real-time nativo,</span><br>não simulado</h2>
+    <div class="before-after">
+      <div class="ba-card">
+        <div class="ba-label">Antes</div>
+        <div class="ba-flow">
+          MySQL → Debezium → Kafka → S3<br>
+          → <span style="color:#ff4444">Databricks Gold (114×/dia)</span><br>
+          → <span style="color:#ff4444">12 tabelas pré-computadas</span><br>
+          → Dashboards<br>
+          <br>
+          <span style="color:#666">Latência: ~12,5 minutos<br>
+          Custo: $3.094/mês<br>
+          Databricks: 3.416 runs/mês</span>
+        </div>
+      </div>
+      <div class="ba-card after">
+        <div class="ba-label">Depois</div>
+        <div class="ba-flow">
+          MySQL → Debezium → Kafka<br>
+          → <strong>Pinot (segundos)</strong> → Dashboards<br>
+          → S3 (histórico)<br>
+          → <strong>Databricks 1×/dia</strong> (regulatório)<br>
+          <br>
+          <strong>Latência: &lt;2 segundos<br>
+          Custo: ~$27/mês<br>
+          Databricks: 30 runs/mês</strong>
+        </div>
+      </div>
+    </div>
+    <div class="insight-box">
+      O Databricks <strong>não é eliminado</strong> — passa a rodar 1×/dia à meia-noite para dados históricos e regulatórios. O Pinot serve as <strong>últimas 24h em tempo real.</strong>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: LIVE TODAY -->
+  <div class="slide slide-live">
+    <div class="slide-label">Já em Produção</div>
+    <h2>Real-time hoje para <span>Casino, Vera e 7K</span></h2>
+    <div class="pinot-value-grid">
+      <div class="pv-card">
+        <div class="pv-icon">⚡</div>
+        <div class="pv-title">Sub-segundo</div>
+        <div class="pv-desc">Queries em dados frescos em menos de 2s. Sem pré-computação, sem espera de job.</div>
+      </div>
+      <div class="pv-card">
+        <div class="pv-icon">📡</div>
+        <div class="pv-title">Ingestão contínua</div>
+        <div class="pv-desc">Consome diretamente do Kafka. Cada evento do banco aparece nos dashboards em segundos.</div>
+      </div>
+      <div class="pv-card">
+        <div class="pv-icon">📈</div>
+        <div class="pv-title">Escala sem custo linear</div>
+        <div class="pv-desc">Infra fixa. Adicionar uma brand ou tabela não aumenta o custo de compute proporcionalmente.</div>
+      </div>
+    </div>
+    <div class="brands-grid">
+      <div class="brand-card">
+        <div class="brand-name">Cassino</div>
+        <div class="brand-tables">
+          <div class="brand-table">transactions · 58.2M rows</div>
+          <div class="brand-table">casino_transactions · 81.9M rows</div>
+          <div class="brand-table">charges · 783K rows</div>
+          <div class="brand-table">withdraws · 158K rows</div>
+          <div class="brand-table">users · 1.7M rows</div>
+          <div class="brand-table">sports_transactions · 311K rows</div>
+        </div>
+      </div>
+      <div class="brand-card">
+        <div class="brand-name">Vera</div>
+        <div class="brand-tables">
+          <div class="brand-table">transactions · 34M rows</div>
+          <div class="brand-table">casino_transactions · 50.6M rows</div>
+          <div class="brand-table">charges · 505K rows</div>
+          <div class="brand-table">withdraws · 88K rows</div>
+          <div class="brand-table">users · 357K rows</div>
+          <div class="brand-table">sports_transactions · 263K rows</div>
+        </div>
+      </div>
+      <div class="brand-card">
+        <div class="brand-name">7K</div>
+        <div class="brand-tables">
+          <div class="brand-table">transactions · 65.4M rows</div>
+          <div class="brand-table">casino_transactions · 89.8M rows</div>
+          <div class="brand-table">charges · 987K rows</div>
+          <div class="brand-table">withdraws · 274K rows</div>
+          <div class="brand-table">users · 548K rows</div>
+          <div class="brand-table">sports_transactions · 1.9M rows</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: IMPACT -->
+  <div class="slide slide-impact">
+    <div class="slide-label">Impacto Financeiro · Brand 7K</div>
+    <h2>99% de redução <br>considerando apenas o Back-Office da <span>7K</span></h2>
+    <div class="impact-grid" style="grid-template-columns:1fr 1fr;margin-bottom:20px">
+      <div class="impact-card">
+        <div class="scenario">Situação Atual — 7K</div>
+        <div class="cost">$3.094</div>
+        <div class="per-year">$37.128 / ano</div>
+        <div class="saving">114× por dia</div>
+      </div>
+      <div class="impact-card winner">
+        <div class="scenario">Com Pinot + Databricks 1×/dia</div>
+        <div class="cost">~$27</div>
+        <div class="per-year">~$324 / ano</div>
+        <div class="saving">economia ~$36.8K/ano</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div class="total-saving">
+        <div>
+          <div class="ts-label">Economia no job — 7K</div>
+          <div style="font-size:13px;color:#666;margin-top:4px">Infra Pinot em produção com 7K, Verabet e Casino: $4.925/mês on-demand</div>
+        </div>
+        <div class="ts-value">$36.8K / ano</div>
+      </div>
+      <div class="total-saving" style="border-color:#4488ff33;background:linear-gradient(135deg,#0d1b2a,#12121a)">
+        <div>
+          <div class="ts-label" style="color:#4488ff">+ EC2 Savings Plans 1yr <span style="font-size:10px;background:#4488ff22;color:#4488ff;padding:2px 8px;border-radius:10px;margin-left:6px">extra</span></div>
+          <div style="font-size:13px;color:#666;margin-top:4px">~35% de desconto na infra · sem lock de região</div>
+        </div>
+        <div class="ts-value" style="color:#4488ff">+$20K / ano</div>
+      </div>
+    </div>
+    <div style="background:#12121a;border:1px solid #ffffff11;border-radius:12px;padding:18px 28px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:13px;color:#8899aa;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Próximo passo · Vera e Casino</div>
+        <div style="font-size:14px;color:#666;line-height:1.5">O mesmo job existe nas outras brands. A migração da 7K cria o blueprint —<br><strong style="color:#fff">Vera e Casino seguem o mesmo modelo, sem retrabalho de arquitetura.</strong></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:32px">
+        <div style="font-size:11px;color:#666;margin-bottom:4px">potencial com 3 brands</div>
+        <div style="font-size:32px;font-weight:900;color:#ffffff55">3×</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: STATUS -->
+  <div class="slide slide-status">
+    <div class="slide-label">Status de Implementação</div>
+    <div class="status-header">
+      <div class="progress-ring-wrap">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#1e2030" stroke-width="10"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#00d4aa" stroke-width="10"
+            stroke-dasharray="314" stroke-dashoffset="79" stroke-linecap="round"/>
+        </svg>
+        <div class="ring-text">75%</div>
+      </div>
+      <div class="status-headline">
+        <span>9 de 12</span> gold tasks já podem ser<br>servidas pelo Pinot hoje.<br>
+        <span>3 tabelas</span> para cobertura total.
+      </div>
+    </div>
+    <div class="status-grid">
+      <div class="status-item">
+        <div class="status-icon">✅</div>
+        <div>
+          <div class="status-name">transactions</div>
+          <div class="status-rows">56,7M rows · funcionando</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-icon">✅</div>
+        <div>
+          <div class="status-name">casino_transactions</div>
+          <div class="status-rows">52,5M rows · funcionando</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-icon">✅</div>
+        <div>
+          <div class="status-name">sports_transactions</div>
+          <div class="status-rows">1,7M rows · funcionando</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-icon">✅</div>
+        <div>
+          <div class="status-name">charges · withdraws · wallets</div>
+          <div class="status-rows">253K / 23K / 120K rows · funcionando</div>
+        </div>
+      </div>
+      <div class="status-item" style="border-color:#ffaa0044;background:linear-gradient(135deg,#1a1500,#12121a)">
+        <div class="status-icon">🔶</div>
+        <div>
+          <div class="status-name" style="color:#ffaa00">gamification_rewards</div>
+          <div class="status-rows">100M rows</div>
+        </div>
+      </div>
+      <div class="status-item" style="border-color:#ffaa0044;background:linear-gradient(135deg,#1a1500,#12121a)">
+        <div class="status-icon">🔶</div>
+        <div>
+          <div class="status-name" style="color:#ffaa00">gamification_freespins + casino_games</div>
+          <div class="status-rows">129,5M + 4,8K rows</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: TIMELINE -->
+  <div class="slide slide-timeline">
+    <div class="slide-label">Plano de Execução</div>
+    <h2>100% em <span>2 meses e meio</span></h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot soon"></div>
+        <div class="tl-time">Semana 1</div>
+        <div class="tl-content">
+          <div class="tl-title">Criar tabelas gamification + casino_games <span class="tl-badge badge-soon">3 tabelas restantes</span></div>
+          <div class="tl-desc">2 tópicos Kafka + ingestão Pinot. Cobertura sobe de 75% → 100%.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot soon"></div>
+        <div class="tl-time">Semana 2 – 3</div>
+        <div class="tl-content">
+          <div class="tl-title">Mapeamento das tabelas Explorer — extração da lógica de negócio</div>
+          <div class="tl-desc">Analisar os valores das tabelas Explorer para extrair e documentar a lógica que hoje existe nas Gold tables do Databricks.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot future"></div>
+        <div class="tl-time">Semana 4</div>
+        <div class="tl-content">
+          <div class="tl-title">Início das principais tabelas em Real-Time <span class="tl-badge badge-soon">Back-Office live</span></div>
+          <div class="tl-desc">Primeiras tabelas críticas servidas pelo Pinot em tempo real. Latência cai de 12 min para segundos.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot future"></div>
+        <div class="tl-time">Semana 5</div>
+        <div class="tl-content">
+          <div class="tl-title">Redução de runs no Databricks + avaliação de dimensionamento</div>
+          <div class="tl-desc">Diminuir frequência do job conforme tabelas migram para Pinot. Avaliar se infra atual suporta a carga — e nesse momento avaliar Savings Plans.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot future"></div>
+        <div class="tl-time">Mês 2 – 2,5</div>
+        <div class="tl-content">
+          <div class="tl-title">Replicar para Vera e Casino <span class="tl-badge badge-saving">validado o blueprint</span></div>
+          <div class="tl-desc">Com a 7K validada, aplicar o mesmo modelo para Vera e Casino. Infra já existe — zero retrabalho de arquitetura.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: ROI -->
+  <div class="slide slide-roi">
+    <div class="roi-center">
+      <div class="roi-label">Retorno sobre Investimento</div>
+      <div class="roi-number">$56.8K</div>
+      <div class="roi-subtitle">economizados por ano — apenas neste caso de uso</div>
+      <div class="roi-breakdown">
+        <div class="roi-item">
+          <div class="rv">$36.8K</div>
+          <div class="rl">Redução do job<br>Databricks · 7K</div>
+        </div>
+        <div class="roi-item">
+          <div class="rv" style="color:#8899aa">+</div>
+        </div>
+        <div class="roi-item" style="position:relative">
+          <div class="rv" style="color:#4488ff">$20K</div>
+          <div class="rl" style="color:#4488ff">Savings Plans<br>infra Pinot</div>
+          <div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;background:#4488ff22;color:#4488ff;padding:2px 8px;border-radius:10px;white-space:nowrap">extra</div>
+        </div>
+        <div class="roi-item">
+          <div class="rv" style="color:#8899aa">=</div>
+        </div>
+        <div class="roi-item">
+          <div class="rv" style="color:#00d4aa">$56.8K</div>
+          <div class="rl">economia<br>anual total</div>
+        </div>
+      </div>
+      <div style="font-size:15px;color:#666;margin-bottom:32px">
+        Infra Pinot: <strong style="color:#fff">$4.925/mês</strong> on-demand, já em produção com 7K, Verabet e Casino · custo incremental <strong style="color:#fff">$0</strong>.<br>
+        Após a 7K: <strong style="color:#fff">Vera e Casino</strong> seguem o mesmo blueprint, sem retrabalho.
+      </div>
+      <button class="roi-cta">Começar pela 7K → Vera → Casino</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- NAVIGATION -->
+<div class="nav">
+  <button onclick="changeSlide(-1)">‹</button>
+  <div class="dots" id="dots"></div>
+  <button onclick="changeSlide(1)">›</button>
+  <div class="slide-counter" id="counter"></div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  const dotsEl = document.getElementById('dots');
+  const counterEl = document.getElementById('counter');
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dotsEl.children[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dotsEl.children[current].classList.add('active');
+    counterEl.textContent = (current + 1) + ' / ' + slides.length;
+  }
+
+  function changeSlide(dir) { goTo(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+  });
+
+  counterEl.textContent = '1 / ' + slides.length;
+</script>
+</body>
+</html>
